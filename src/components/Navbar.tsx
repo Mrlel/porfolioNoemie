@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
@@ -12,299 +12,316 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeLink, setActiveLink] = useState("#hero");
+  const mobileMenuRef = useRef(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
+    const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Lock body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
-        .nav-root {
-          font-family: 'Rajdhani', sans-serif;
+        :root {
+          --violet:      #8B5CF6;
+          --violet-dim:  rgba(139, 92, 246, 0.14);
+          --violet-glow: rgba(139, 92, 246, 0.45);
+          --glass-bg:    rgba(6, 6, 12, 0.78);
+          --glass-border:rgba(255, 255, 255, 0.07);
+          --text-muted:  #64748b;
+          --text-bright: #f1f5f9;
+          --font-display:'Syne', sans-serif;
+          --font-body:   'DM Sans', sans-serif;
         }
 
-        .nav-logo {
-          font-family: 'Orbitron', monospace;
-          font-weight: 900;
-          font-size: 1.1rem;
-          letter-spacing: 0.15em;
-          background: linear-gradient(135deg, #00f5ff 0%, #0080ff 50%, #7b2fff 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          position: relative;
-          text-decoration: none;
-          transition: all 0.3s ease;
+        /* ── NAV ROOT ── */
+        .paha-nav {
+          font-family: var(--font-body);
+          transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                      background 0.4s ease,
+                      box-shadow 0.4s ease;
         }
 
-        .nav-logo::after {
-          content: '';
-          position: absolute;
-          bottom: -4px;
-          left: 0;
-          width: 100%;
-          height: 1px;
-          background: linear-gradient(90deg, #00f5ff, #7b2fff);
-          transform: scaleX(0);
-          transform-origin: left;
-          transition: transform 0.3s ease;
-        }
-
-        .nav-logo:hover::after {
-          transform: scaleX(1);
-        }
-
-        .nav-scrolled {
-          background: rgba(2, 4, 15, 0.85);
+        .paha-nav.scrolled {
+          background: var(--glass-bg) !important;
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(0, 245, 255, 0.1);
-          box-shadow: 0 0 40px rgba(0, 245, 255, 0.05);
+          border-bottom: 1px solid var(--glass-border);
+          box-shadow: 0 1px 40px rgba(0, 0, 0, 0.5);
+          padding-top: 12px !important;
+          padding-bottom: 12px !important;
         }
 
-        .nav-transparent {
-          background: transparent;
-        }
-
-        .nav-link {
-          font-family: 'Rajdhani', sans-serif;
-          font-weight: 600;
-          font-size: 0.8rem;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: rgba(180, 210, 255, 0.6);
-          text-decoration: none;
-          position: relative;
-          padding: 4px 0;
-          transition: color 0.3s ease;
-        }
-
-        .nav-link::before {
+        /* Glowing top-edge line when scrolled */
+        .paha-nav.scrolled::before {
           content: '';
           position: absolute;
-          bottom: -2px;
-          left: 0;
-          width: 0;
+          top: 0; left: 50%;
+          transform: translateX(-50%);
+          width: 40%;
           height: 1px;
-          background: linear-gradient(90deg, #00f5ff, #7b2fff);
-          transition: width 0.3s ease;
+          background: linear-gradient(90deg, transparent, var(--violet), transparent);
+          opacity: 0.6;
         }
 
-        .nav-link:hover {
-          color: #00f5ff;
-        }
-
-        .nav-link:hover::before,
-        .nav-link.active::before {
-          width: 100%;
-        }
-
-        .nav-link.active {
-          color: #00f5ff;
-        }
-
-        .nav-link::after {
-          content: attr(data-text);
-          position: absolute;
-          top: 0;
-          left: 0;
-          color: #00f5ff;
-          opacity: 0;
-          filter: blur(8px);
-          transition: opacity 0.3s ease;
-        }
-
-        .nav-link:hover::after {
-          opacity: 0.4;
-        }
-
-        /* Corner accent */
-        .nav-corner-accent {
-          position: absolute;
-          width: 8px;
-          height: 8px;
-          border-color: rgba(0, 245, 255, 0.4);
-          border-style: solid;
-        }
-
-        .nav-corner-tl {
-          top: 6px; left: 6px;
-          border-width: 1px 0 0 1px;
-        }
-
-        .nav-corner-tr {
-          top: 6px; right: 6px;
-          border-width: 1px 1px 0 0;
-        }
-
-        .nav-corner-bl {
-          bottom: 6px; left: 6px;
-          border-width: 0 0 1px 1px;
-        }
-
-        .nav-corner-br {
-          bottom: 6px; right: 6px;
-          border-width: 0 1px 1px 0;
-        }
-
-        /* CTA Button */
-        .nav-cta {
-          font-family: 'Orbitron', monospace;
-          font-size: 0.65rem;
-          font-weight: 700;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          color: #00f5ff;
+        /* ── LOGO ── */
+        .paha-logo {
+          font-family: var(--font-display);
+          font-weight: 800;
+          font-size: 1.22rem;
+          color: #ffffff;
           text-decoration: none;
-          padding: 8px 20px;
-          border: 1px solid rgba(0, 245, 255, 0.4);
+          letter-spacing: -0.03em;
           position: relative;
-          overflow: hidden;
-          transition: all 0.3s ease;
-          clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+          display: inline-flex;
+          align-items: center;
         }
 
-        .nav-cta::before {
+        .paha-logo .dot {
+          color: var(--violet);
+          display: inline-block;
+          transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .paha-logo:hover .dot {
+          transform: rotate(90deg) scale(1.5);
+        }
+
+        /* Magnetic particles around logo */
+        .logo-particles {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        .lp {
+          position: absolute;
+          top: 50%; left: 50%;
+          width: 3px; height: 3px;
+          margin: -1.5px 0 0 -1.5px;
+          background: var(--violet);
+          border-radius: 50%;
+          opacity: 0;
+          transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .paha-logo:hover .lp   { opacity: 0.65; }
+        .paha-logo:hover .lp1  { transform: translate(-28px, -20px); }
+        .paha-logo:hover .lp2  { transform: translate(4px, -30px); }
+        .paha-logo:hover .lp3  { transform: translate(30px, -12px); }
+        .paha-logo:hover .lp4  { transform: translate(26px, 16px); }
+        .paha-logo:hover .lp5  { transform: translate(-4px, 28px); }
+        .paha-logo:hover .lp6  { transform: translate(-30px, 8px); }
+
+        /* ── NAV LINK ── */
+        .paha-link {
+          position: relative;
+          font-size: 0.875rem;
+          font-weight: 400;
+          color: var(--text-muted);
+          text-decoration: none;
+          padding: 8px 16px;
+          border-radius: 100px;
+          transition: color 0.25s ease;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+
+        /* Pill background hover */
+        .paha-link::before {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(123,47,255,0.1));
+          border-radius: 100px;
+          background: var(--violet-dim);
           opacity: 0;
-          transition: opacity 0.3s ease;
+          transform: scale(0.75);
+          transition: opacity 0.3s ease,
+                      transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+        .paha-link:hover { color: var(--text-bright); }
+        .paha-link:hover::before { opacity: 1; transform: scale(1); }
 
-        .nav-cta:hover::before {
-          opacity: 1;
-        }
+        /* Active state */
+        .paha-link.active { color: #ffffff; }
+        .paha-link.active::before { opacity: 1; transform: scale(1); }
 
-        .nav-cta:hover {
-          border-color: rgba(0, 245, 255, 0.8);
-          box-shadow: 0 0 20px rgba(0, 245, 255, 0.2), inset 0 0 20px rgba(0, 245, 255, 0.05);
-          color: #fff;
-        }
-
-        /* Scanning line animation */
-        @keyframes scanLine {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(400%); }
-        }
-
-        .nav-scan-line {
+        /* Pulsing dot beneath active link */
+        .paha-link.active::after {
+          content: '';
           position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 25%;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, #00f5ff, transparent);
-          animation: scanLine 4s linear infinite;
-        }
-
-        /* Mobile menu */
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .mobile-menu {
-          animation: slideDown 0.3s ease forwards;
-          background: rgba(2, 4, 20, 0.95);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(0, 245, 255, 0.1);
-          border-radius: 2px;
-        }
-
-        .mobile-link {
-          font-family: 'Rajdhani', sans-serif;
-          font-weight: 600;
-          font-size: 0.9rem;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: rgba(180, 210, 255, 0.6);
-          text-decoration: none;
-          padding: 12px 0;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          border-bottom: 1px solid rgba(0, 245, 255, 0.05);
-          transition: color 0.3s ease, padding-left 0.3s ease;
-        }
-
-        .mobile-link:last-child {
-          border-bottom: none;
-        }
-
-        .mobile-link:hover {
-          color: #00f5ff;
-          padding-left: 8px;
-        }
-
-        .mobile-link .link-index {
-          font-family: 'Orbitron', monospace;
-          font-size: 0.55rem;
-          color: rgba(0, 245, 255, 0.4);
-        }
-
-        /* Hamburger */
-        .hamburger-btn {
-          background: rgba(0, 245, 255, 0.05);
-          border: 1px solid rgba(0, 245, 255, 0.2);
-          padding: 6px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
-        }
-
-        .hamburger-btn:hover {
-          background: rgba(0, 245, 255, 0.1);
-          border-color: rgba(0, 245, 255, 0.5);
-        }
-
-        /* Status dot */
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(0.8); }
-        }
-
-        .status-dot {
-          width: 5px;
-          height: 5px;
+          bottom: 5px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 4px; height: 4px;
           border-radius: 50%;
-          background: #00f5ff;
-          animation: pulse 2s ease-in-out infinite;
-          box-shadow: 0 0 6px #00f5ff;
+          background: var(--violet);
+          box-shadow: 0 0 8px var(--violet-glow);
+          animation: dotPulse 2s ease-in-out infinite;
+        }
+        @keyframes dotPulse {
+          0%, 100% { box-shadow: 0 0 8px var(--violet-glow); }
+          50%       { box-shadow: 0 0 18px var(--violet-glow), 0 0 36px var(--violet-glow); }
+        }
+
+        /* ── CTA BUTTON ── */
+        .paha-cta {
+          position: relative;
+          overflow: hidden;
+          background: #ffffff;
+          color: #000000;
+          padding: 9px 22px;
+          border-radius: 100px;
+          font-family: var(--font-display);
+          font-size: 0.83rem;
+          font-weight: 700;
+          text-decoration: none;
+          letter-spacing: 0.01em;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .paha-cta:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(255, 255, 255, 0.18);
+        }
+
+        /* Shimmer sweep */
+        .paha-cta::after {
+          content: '';
+          position: absolute;
+          top: 0; left: -100%;
+          width: 55%; height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.45),
+            transparent
+          );
+          transition: left 0.55s ease;
+        }
+        .paha-cta:hover::after { left: 160%; }
+
+        /* ── MOBILE MENU OVERLAY ── */
+        .paha-mobile-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 40;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0;
+          background: #05050d;
+
+          /* Fade + slide-in */
+          animation: mobileIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        @keyframes mobileIn {
+          from { opacity: 0; transform: translateY(-12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Decorative accent line in overlay */
+        .paha-mobile-overlay::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 50%;
+          transform: translateX(-50%);
+          width: 50%; height: 1px;
+          background: linear-gradient(90deg, transparent, var(--violet), transparent);
+        }
+
+        .paha-mobile-link {
+          font-family: var(--font-display);
+          font-size: clamp(2rem, 8vw, 2.6rem);
+          font-weight: 800;
+          color: #3a3a55;
+          text-decoration: none;
+          letter-spacing: -0.03em;
+          padding: 10px 0;
+          transition: color 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .paha-mobile-link:hover {
+          color: #ffffff;
+          transform: translateX(8px);
+        }
+
+        .paha-mobile-cta {
+          margin-top: 28px;
+          background: #ffffff;
+          color: #000000;
+          padding: 14px 48px;
+          border-radius: 100px;
+          font-family: var(--font-display);
+          font-size: 1.1rem;
+          font-weight: 700;
+          text-decoration: none;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .paha-mobile-cta:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 40px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Staggered entrance for mobile links */
+        .paha-mobile-link:nth-child(1) { animation: linkIn 0.4s 0.05s ease both; }
+        .paha-mobile-link:nth-child(2) { animation: linkIn 0.4s 0.10s ease both; }
+        .paha-mobile-link:nth-child(3) { animation: linkIn 0.4s 0.15s ease both; }
+        .paha-mobile-link:nth-child(4) { animation: linkIn 0.4s 0.20s ease both; }
+        .paha-mobile-cta              { animation: linkIn 0.4s 0.28s ease both; }
+        @keyframes linkIn {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── HAMBURGER ── */
+        .paha-ham {
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          color: #ffffff;
+          z-index: 50;
+        }
+        .paha-ham:focus-visible {
+          outline: 2px solid var(--violet);
+          border-radius: 6px;
         }
       `}</style>
 
       <nav
-        className={`nav-root fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? "nav-scrolled py-3" : "nav-transparent py-5"
+        className={`paha-nav fixed top-0 left-0 right-0 z-50 py-6 ${
+          scrolled ? "scrolled" : "bg-transparent"
         }`}
       >
-        {/* Scanning line */}
-        {scrolled && <div className="nav-scan-line" />}
+        <div className="max-w-7xl mx-auto px-8 flex items-center justify-between">
 
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between relative">
-
-          {/* Logo */}
-          <a href="#hero" className="nav-logo flex items-center gap-2">
-            <div className="status-dot" />
-            PAHA.DEV
+          {/* ── Logo ── */}
+          <a href="#hero" className="paha-logo">
+            PAHA<span className="dot">.</span>DEV
+            {/* Magnetic particles */}
+            <span className="logo-particles" aria-hidden="true">
+              <span className="lp lp1" />
+              <span className="lp lp2" />
+              <span className="lp lp3" />
+              <span className="lp lp4" />
+              <span className="lp lp5" />
+              <span className="lp lp6" />
+            </span>
           </a>
 
-          {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-10">
-            {navLinks.map((link, i) => (
+          {/* ── Desktop links ── */}
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                data-text={link.label}
-                className={`nav-link ${activeLink === link.href ? "active" : ""}`}
+                className={`paha-link ${activeLink === link.href ? "active" : ""}`}
                 onClick={() => setActiveLink(link.href)}
               >
                 {link.label}
@@ -312,36 +329,30 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Mobile toggle */}
+          {/* ── Mobile toggle ── */}
           <button
-            className="md:hidden hamburger-btn"
+            className="md:hidden paha-ham"
             onClick={() => setMobileOpen(!mobileOpen)}
-            style={{ color: "#00f5ff" }}
+            aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
         </div>
 
-        {/* Mobile menu */}
+        {/* ── Fullscreen mobile menu ── */}
         {mobileOpen && (
-          <div className="mobile-menu md:hidden mt-2 mx-4 p-6 relative">
-            {/* Corner accents */}
-            <div className="nav-corner-accent nav-corner-tl" />
-            <div className="nav-corner-accent nav-corner-tr" />
-            <div className="nav-corner-accent nav-corner-bl" />
-            <div className="nav-corner-accent nav-corner-br" />
-
-            {navLinks.map((link, i) => (
+          <div className="paha-mobile-overlay md:hidden" ref={mobileMenuRef}>
+            {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="mobile-link"
+                className="paha-mobile-link"
                 onClick={() => {
                   setMobileOpen(false);
                   setActiveLink(link.href);
                 }}
               >
-                <span className="link-index">0{i + 1}</span>
                 {link.label}
               </a>
             ))}

@@ -1,35 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import { Code2, Palette, MapPin, Mail, Phone, MessageCircle, GraduationCap, Languages, Briefcase, Clock } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { MapPin, Mail, Phone, MessageCircle, Languages, Clock } from "lucide-react";
 
-const stats = [
-  { value: "1+", label: "Years of Experience", suffix: "YRS" },
-  { value: "5+", label: "Projects Delivered", suffix: "PRJ" },
-  { value: "8+", label: "Happy Clients", suffix: "CLT" },
-  { value: "∞", label: "Lines of Code", suffix: "LOC" },
-];
-
-const highlights = [
-  {
-    icon: Code2,
-    title: "Clean Code",
-    desc: "Solid, maintainable architecture built to scale — no spaghetti, just structure.",
-    color: "#00f5ff",
-  },
-  {
-    icon: Palette,
-    title: "UI / UX Design",
-    desc: "Elegant, intuitive interfaces where every pixel has a purpose.",
-    color: "#7b2fff",
-  },
+const contactCards = [
+  { icon: MapPin,        label: "Location",   value: "Al Nahda 1, Dubai, UAE" },
+  { icon: Mail,          label: "Email",      value: "pahanohemie@gmail.com",  href: "mailto:pahanohemie@gmail.com" },
+  { icon: Phone,         label: "Phone",      value: "+971 542 371 689",        href: "tel:+971542371689" },
+  { icon: MessageCircle, label: "WhatsApp",   value: "+225 0173 551 927\n+971 542 371 689", href: "https://wa.me/2250173551927" },
+  { icon: Languages,     label: "Languages",  tags: ["French", "English"] },
+  { icon: Clock,         label: "Experience", bold: "1+ Year Pro XP" },
 ];
 
 const AboutSection = () => {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
-      ([e]) => e.isIntersecting && setVisible(true),
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.unobserve(e.target); } },
       { threshold: 0.1 }
     );
     if (ref.current) obs.observe(ref.current);
@@ -39,419 +26,415 @@ const AboutSection = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
-        #about {
-          font-family: 'Rajdhani', sans-serif;
-          background: #02040f;
-          padding: 8rem 1.5rem;
+        /* ── Keyframes ── */
+        @keyframes ab-fade-up   { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes ab-scale-in  { from{opacity:0;transform:scale(0.9)}       to{opacity:1;transform:scale(1)} }
+        @keyframes ab-float     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        @keyframes ab-orbit     { from{transform:rotate(0deg) translateX(var(--r,110px)) rotate(0deg)}
+                                   to  {transform:rotate(360deg) translateX(var(--r,110px)) rotate(-360deg)} }
+        @keyframes ab-spin-ring { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @keyframes ab-glow-pulse{
+          0%,100%{box-shadow:0 0 20px rgba(139,92,246,0.25),0 0 60px rgba(139,92,246,0.08)}
+          50%    {box-shadow:0 0 40px rgba(139,92,246,0.45),0 0 100px rgba(139,92,246,0.15)}
+        }
+        @keyframes ab-dot-pulse {
+          0%,100%{box-shadow:0 0 6px rgba(139,92,246,0.5)}
+          50%    {box-shadow:0 0 14px rgba(139,92,246,0.9),0 0 28px rgba(139,92,246,0.4)}
+        }
+        @keyframes ab-shimmer {
+          0%  {background-position:200% center}
+          100%{background-position:-200% center}
+        }
+
+        /* ── Root ── */
+        .ab-root {
+          font-family: 'DM Sans', sans-serif;
+          background: #000000;
+          color: #ffffff;
+          padding: 110px 24px 130px;
           position: relative;
           overflow: hidden;
         }
 
-        #about::before {
-          content: ''; position: absolute; inset: 0;
+        /* Ambient blobs */
+        .ab-blob {
+          position: absolute; border-radius: 50%;
+          filter: blur(90px); pointer-events: none;
+        }
+        .ab-blob-1 { width:480px;height:480px; background:rgba(139,92,246,0.06); top:-120px; right:-100px; }
+        .ab-blob-2 { width:320px;height:320px; background:rgba(96,165,250,0.04); bottom:-60px; left:-80px; }
+
+        /* Grid lines */
+        .ab-grid {
+          position: absolute; inset: 0; pointer-events: none;
           background-image:
-            linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
-          background-size: 60px 60px; pointer-events: none;
+            linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
+          background-size: 64px 64px;
         }
 
-        .about-glow-a {
-          position: absolute; width: 500px; height: 500px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(123,47,255,0.07) 0%, transparent 70%);
-          top: -100px; right: -100px; pointer-events: none;
+        .ab-inner { max-width: 1060px; margin: 0 auto; position: relative; }
+
+        /* Eyebrow */
+        .ab-eyebrow {
+          display: inline-flex; align-items: center; gap: 10px;
+          font-size: 0.72rem; font-weight: 700;
+          text-transform: uppercase; letter-spacing: 0.13em;
+          color: #8B5CF6; margin-bottom: 20px;
+          opacity: 0; transform: translateY(14px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .ab-eyebrow.on { opacity:1; transform:translateY(0); }
+        .ab-eyebrow-line { display:inline-block; width:28px; height:2px; background:#8B5CF6; border-radius:1px; flex-shrink:0; }
+
+        /* ── MAIN GRID ── */
+        .ab-main {
+          display: grid;
+          grid-template-columns: 1fr 380px;
+          gap: 72px;
+          align-items: center;
+          margin-bottom: 64px;
+        }
+        @media(max-width:820px){ .ab-main{grid-template-columns:1fr;gap:48px;} }
+
+        /* Text col */
+        .ab-text {
+          opacity: 0; transform: translateY(22px);
+          transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .ab-text.on { opacity:1; transform:translateY(0); }
+
+        .ab-title {
+          font-family: 'Syne', sans-serif;
+          font-size: clamp(2.2rem, 5vw, 3.4rem);
+          font-weight: 800; line-height: 1.08;
+          letter-spacing: -0.04em; margin-bottom: 28px;
+        }
+        .ab-title .accent { color: #8B5CF6; }
+
+        /* Shimmer accent text */
+        .ab-title .shimmer-txt {
+          background: linear-gradient(
+            90deg,
+            #8B5CF6 0%, #a78bfa 25%, #c4b5fd 50%, #a78bfa 75%, #8B5CF6 100%
+          );
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: ab-shimmer 4s linear infinite;
         }
 
-        .about-glow-b {
-          position: absolute; width: 400px; height: 400px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(0,245,255,0.05) 0%, transparent 70%);
-          bottom: 0; left: -100px; pointer-events: none;
+        .ab-p {
+          font-size: 1rem; line-height: 1.85;
+          color: #4a5568; margin-bottom: 20px;
+        }
+        .ab-p strong { color: #94a3b8; font-weight: 500; }
+
+        /* Small stat pills below text */
+        .ab-stats {
+          display: flex; gap: 12px; flex-wrap: wrap;
+          margin-top: 32px;
+        }
+        .ab-stat {
+          display: flex; flex-direction: column;
+          padding: 14px 20px; border-radius: 14px;
+          background: #0a0a0a; border: 1px solid #1e1e1e;
+          transition: border-color 0.3s, transform 0.3s;
+        }
+        .ab-stat:hover { border-color: rgba(139,92,246,0.35); transform: translateY(-3px); }
+        .ab-stat-num {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1;
+        }
+        .ab-stat-lbl { font-size: 0.75rem; color: #4a5568; margin-top: 4px; }
+
+        /* ── PHOTO COL ── */
+        .ab-photo-col {
+          opacity: 0; transform: translateY(22px) scale(0.96);
+          transition: opacity 0.9s ease 0.15s, transform 0.9s ease 0.15s;
+          display: flex; justify-content: center;
+        }
+        .ab-photo-col.on { opacity:1; transform:translateY(0) scale(1); }
+
+        .ab-photo-wrap {
+          position: relative;
+          width: 300px; height: 360px;
+          flex-shrink: 0;
         }
 
-        .about-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 2; }
-
-        .about-eyebrow {
-          font-family: 'Orbitron', monospace; font-size: 0.6rem; font-weight: 700;
-          letter-spacing: 0.3em; text-transform: uppercase; color: #00f5ff;
-          display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;
+        /* Corner decorations */
+        .ab-corner {
+          position: absolute; width: 24px; height: 24px;
+          border-color: rgba(139,92,246,0.5); border-style: solid;
+          pointer-events: none;
         }
-        .about-eyebrow::before { content: ''; width: 30px; height: 1px; background: linear-gradient(90deg, transparent, #00f5ff); }
+        .ab-corner-tl { top:-6px; left:-6px;  border-width:2px 0 0 2px; border-radius:3px 0 0 0; }
+        .ab-corner-tr { top:-6px; right:-6px; border-width:2px 2px 0 0; border-radius:0 3px 0 0; }
+        .ab-corner-bl { bottom:-6px; left:-6px;  border-width:0 0 2px 2px; border-radius:0 0 0 3px; }
+        .ab-corner-br { bottom:-6px; right:-6px; border-width:0 2px 2px 0; border-radius:0 0 3px 0; }
 
-        .about-heading {
-          font-family: 'Orbitron', monospace; font-size: clamp(2rem, 4vw, 3rem);
-          font-weight: 900; color: #e8f4ff; line-height: 1.1; margin-bottom: 4rem;
-        }
-        .about-heading span {
-          background: linear-gradient(135deg, #00f5ff, #7b2fff);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-        }
-
-        .about-grid {
-          display: grid; grid-template-columns: 1fr 1fr;
-          gap: 3.5rem; align-items: start; margin-bottom: 3.5rem;
-        }
-        @media (max-width: 768px) { .about-grid { grid-template-columns: 1fr; gap: 2.5rem; } }
-
-        .about-text-block { position: relative; }
-        .about-text-block::before {
-          content: ''; position: absolute; left: -20px; top: 0; bottom: 0; width: 1px;
-          background: linear-gradient(to bottom, #00f5ff, rgba(123,47,255,0.5), transparent);
+        /* Spinning dashed ring */
+        .ab-spin-ring {
+          position: absolute;
+          top: 50%; left: 50%;
+          width: 330px; height: 400px;
+          margin: -200px 0 0 -165px;
+          border-radius: 50%;
+          border: 1.5px dashed rgba(139,92,246,0.18);
+          animation: ab-spin-ring 18s linear infinite;
+          pointer-events: none;
         }
 
-        .about-body { font-size: 1.05rem; font-weight: 400; line-height: 1.9; color: rgba(180,210,255,0.6); margin-bottom: 1.5rem; }
-        .about-body strong { color: rgba(180,210,255,0.9); font-weight: 600; }
+        /* Orbital planets */
+        .ab-planet {
+          position: absolute;
+          top: 50%; left: 50%;
+          width: 34px; height: 34px;
+          margin: -17px 0 0 -17px;
+          border-radius: 50%;
+          background: #0e0e0e;
+          border: 1px solid rgba(139,92,246,0.28);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 14px;
+          animation: ab-orbit var(--dur,9s) linear infinite;
+          animation-delay: var(--delay,0s);
+        }
 
-        .highlight-card {
-          position: relative; padding: 1.4rem 1.5rem;
-          background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
-          overflow: hidden; transition: all 0.4s ease; cursor: default;
-        }
-        .highlight-card::before {
-          content: ''; position: absolute; inset: 0;
-          background: linear-gradient(135deg, var(--card-color-a, transparent), transparent);
-          opacity: 0; transition: opacity 0.4s ease;
-        }
-        .highlight-card:hover { border-color: var(--card-border, rgba(0,245,255,0.2)); transform: translateX(6px); }
-        .highlight-card:hover::before { opacity: 1; }
-        .highlight-card::after {
-          content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
-          background: var(--card-border, #00f5ff); transform: scaleY(0); transform-origin: bottom; transition: transform 0.4s ease;
-        }
-        .highlight-card:hover::after { transform: scaleY(1); }
-
-        .highlight-icon-wrap {
-          width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-          border: 1px solid; clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
-          margin-bottom: 1rem; flex-shrink: 0;
-        }
-        .highlight-title { font-family: 'Orbitron', monospace; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.4rem; }
-        .highlight-desc { font-size: 0.9rem; line-height: 1.7; color: rgba(180,210,255,0.5); font-weight: 400; }
-
-        /* ── RECRUITER BLOCK ── */
-        .recruiter-block {
-          position: relative; margin-bottom: 3.5rem;
-          border: 1px solid rgba(0,245,255,0.12);
+        /* Photo frame */
+        .ab-photo-frame {
+          position: relative; z-index: 2;
+          width: 300px; height: 360px;
+          border-radius: 24px;
           overflow: hidden;
+          border: 1px solid rgba(139,92,246,0.25);
+          animation: ab-glow-pulse 4s ease-in-out infinite;
         }
 
-        /* Animated top accent */
-        .recruiter-block::before {
-          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-          background: linear-gradient(90deg, transparent, #00f5ff 30%, #7b2fff 70%, transparent);
+        .ab-photo-frame img {
+          width: 100%; height: 100%;
+          object-fit: cover;
+          object-position: top center;
+          display: block;
+          filter: contrast(1.03) brightness(1.02);
+          transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+        }
+        .ab-photo-frame:hover img { transform: scale(1.04); }
+
+        /* Gradient overlay at bottom of photo */
+        .ab-photo-overlay {
+          position: absolute; bottom: 0; left: 0; right: 0;
+          height: 100px;
+          background: linear-gradient(to top, #000 0%, transparent 100%);
+          pointer-events: none;
+          z-index: 3;
         }
 
-        @keyframes scanBlock {
-          0% { left: -25%; }
-          100% { left: 110%; }
+        /* Name tag on photo */
+        .ab-name-tag {
+          position: absolute; bottom: 16px; left: 16px; right: 16px;
+          z-index: 4;
+          display: flex; align-items: center; gap: 10px;
+        }
+        .ab-name-tag-inner {
+          background: rgba(10,10,18,0.85);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(139,92,246,0.25);
+          border-radius: 12px;
+          padding: 10px 14px;
+          flex: 1;
+        }
+        .ab-name-tag-name {
+          font-family: 'Syne', sans-serif;
+          font-size: 0.92rem; font-weight: 700;
+          color: #fff; line-height: 1;
+        }
+        .ab-name-tag-role { font-size: 0.72rem; color: #64748b; margin-top: 3px; }
+
+        /* Status dot */
+        .ab-status-dot {
+          width: 10px; height: 10px; border-radius: 50%;
+          background: #10b981; flex-shrink: 0;
+          animation: ab-dot-pulse 2s ease-in-out infinite;
         }
 
-        .recruiter-scan {
-          position: absolute; top: 0; bottom: 0; width: 25%;
-          background: linear-gradient(90deg, transparent, rgba(0,245,255,0.03), transparent);
-          animation: scanBlock 7s linear infinite;
-          pointer-events: none; z-index: 0;
+        /* ── CONTACT CARDS ── */
+        .ab-cards {
+          display: grid;
+          grid-template-columns: repeat(3,1fr);
+          gap: 14px;
+          opacity: 0; transform: translateY(20px);
+          transition: opacity 0.8s ease 0.3s, transform 0.8s ease 0.3s;
         }
+        .ab-cards.on { opacity:1; transform:translateY(0); }
+        @media(max-width:720px){ .ab-cards{grid-template-columns:1fr 1fr;} }
+        @media(max-width:480px){ .ab-cards{grid-template-columns:1fr;} }
 
-        /* Block header */
-        .recruiter-header {
-          display: flex; align-items: center; justify-content: space-between;
-          padding: 1rem 1.6rem;
-          background: rgba(0,245,255,0.02);
-          border-bottom: 1px solid rgba(0,245,255,0.07);
-          position: relative; z-index: 1;
-          flex-wrap: wrap; gap: 10px;
-        }
-
-        .recruiter-title {
-          font-family: 'Orbitron', monospace; font-size: 0.55rem; font-weight: 700;
-          letter-spacing: 0.3em; text-transform: uppercase; color: #00f5ff;
-          display: flex; align-items: center; gap: 8px;
-        }
-
-        .rh-dot {
-          width: 5px; height: 5px; border-radius: 50%;
-          background: #00f5ff; box-shadow: 0 0 8px #00f5ff;
-          animation: blink 2s ease-in-out infinite;
-        }
-
-        .recruiter-badge {
-          font-family: 'Orbitron', monospace; font-size: 0.45rem; font-weight: 700;
-          letter-spacing: 0.15em; text-transform: uppercase; color: #00ff88;
-          background: rgba(0,255,136,0.07); border: 1px solid rgba(0,255,136,0.2);
-          padding: 4px 12px;
-          clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
-          display: flex; align-items: center; gap: 6px;
-        }
-
-        .badge-pulse {
-          width: 4px; height: 4px; border-radius: 50%;
-          background: #00ff88; box-shadow: 0 0 6px #00ff88;
-          animation: blink 1.5s ease-in-out infinite;
-        }
-
-        /* 4-col info grid */
-        .info-grid {
-          display: grid; grid-template-columns: repeat(4, 1fr);
-          gap: 1px; background: rgba(0,245,255,0.05);
-          position: relative; z-index: 1;
-        }
-
-        @media (max-width: 900px) { .info-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 480px)  { .info-grid { grid-template-columns: 1fr; } }
-
-        .info-cell {
-          background: #02040f; padding: 1.4rem 1.5rem;
-          transition: background 0.3s ease; position: relative; overflow: hidden;
-        }
-
-        .info-cell::after {
-          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-          background: var(--cc, #00f5ff); opacity: 0; transition: opacity 0.3s ease;
-        }
-
-        .info-cell:hover { background: rgba(255,255,255,0.018); }
-        .info-cell:hover::after { opacity: 0.35; }
-
-        .ic-icon {
-          width: 30px; height: 30px;
-          border: 1px solid; display: flex; align-items: center; justify-content: center;
-          clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
-          margin-bottom: 0.85rem;
-        }
-
-        .ic-label {
-          font-family: 'Orbitron', monospace; font-size: 0.43rem; font-weight: 700;
-          letter-spacing: 0.25em; text-transform: uppercase;
-          display: block; margin-bottom: 6px;
-        }
-
-        .ic-value {
-          font-family: 'Rajdhani', sans-serif; font-size: 0.88rem; font-weight: 600;
-          color: rgba(220,235,255,0.8); line-height: 1.5;
-          white-space: pre-line; display: block;
-          text-decoration: none; transition: color 0.3s ease;
-        }
-
-        a.ic-value:hover { color: #fff; }
-
-        /* Tag pill */
-        .tag-pill {
-          font-family: 'Orbitron', monospace; font-size: 0.43rem; font-weight: 700;
-          letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px;
-          clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
-          display: inline-block;
-        }
-
-        /* Stats */
-        .stats-row {
-          display: grid; grid-template-columns: repeat(4, 1fr);
-          gap: 1px; background: rgba(0,245,255,0.06);
-          border: 1px solid rgba(0,245,255,0.08);
+        .ab-card {
+          background: #080808;
+          border: 1px solid #181818;
+          border-radius: 16px;
+          padding: 18px 20px;
+          transition: border-color 0.3s, transform 0.3s, background 0.3s;
           position: relative; overflow: hidden;
         }
-
-        @media (max-width: 640px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-
-        @keyframes scanStats { 0% { transform: translateX(-100%); } 100% { transform: translateX(500%); } }
-
-        .stats-row::after {
-          content: ''; position: absolute; top: 0; bottom: 0; width: 60px;
-          background: linear-gradient(90deg, transparent, rgba(0,245,255,0.06), transparent);
-          animation: scanStats 5s linear infinite; pointer-events: none;
+        .ab-card::before {
+          content: '';
+          position: absolute; top:0; left:0; right:0; height:2px;
+          background: linear-gradient(90deg, transparent, #8B5CF6, transparent);
+          opacity: 0; transition: opacity 0.3s;
         }
+        .ab-card:hover { border-color:rgba(139,92,246,0.3); background:#0c0c0c; transform:translateY(-4px); }
+        .ab-card:hover::before { opacity:1; }
 
-        .stat-cell { background: #02040f; padding: 2rem 1.5rem; text-align: center; transition: background 0.3s ease; }
-        .stat-cell:hover { background: rgba(0,245,255,0.03); }
-
-        .stat-suffix {
-          font-family: 'Orbitron', monospace; font-size: 0.45rem; font-weight: 700;
-          letter-spacing: 0.3em; color: rgba(0,245,255,0.3);
-          display: block; margin-bottom: 0.4rem; text-transform: uppercase;
+        .ab-card-hdr {
+          display: flex; align-items: center; gap: 8px;
+          font-size: 0.68rem; font-weight: 700;
+          text-transform: uppercase; letter-spacing: 0.11em;
+          color: #8B5CF6; margin-bottom: 10px;
         }
-
-        .stat-value {
-          font-family: 'Orbitron', monospace; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 900;
-          background: linear-gradient(135deg, #00f5ff, #0080ff);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-          line-height: 1; margin-bottom: 0.5rem; display: block;
+        .ab-card-ico {
+          width: 26px; height: 26px; border-radius: 8px;
+          background: rgba(139,92,246,0.1);
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
+        .ab-card-val {
+          font-size: 0.9rem; color: #cbd5e1; line-height: 1.65;
+          text-decoration: none; display: block; white-space: pre-line;
+        }
+        a.ab-card-val:hover { color: #a78bfa; }
 
-        .stat-label { font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em; color: rgba(180,210,255,0.4); text-transform: uppercase; }
-
-        .fade-up { transition: opacity 0.7s ease, transform 0.7s ease; }
-        .fade-up.hidden { opacity: 0; transform: translateY(24px); }
-        .fade-up.visible { opacity: 1; transform: translateY(0); }
-
-        .fade-right { transition: opacity 0.7s ease, transform 0.7s ease; }
-        .fade-right.hidden { opacity: 0; transform: translateX(20px); }
-        .fade-right.visible { opacity: 1; transform: translateX(0); }
-
-        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .ab-tag-pill {
+          display: inline-block;
+          font-size: 0.71rem; font-weight: 600;
+          padding: 4px 10px;
+          background: rgba(139,92,246,0.1);
+          color: #a78bfa;
+          border: 1px solid rgba(139,92,246,0.2);
+          border-radius: 100px;
+          margin: 2px 4px 2px 0;
+        }
       `}</style>
 
-      <section id="about" ref={ref}>
-        <div className="about-glow-a" />
-        <div className="about-glow-b" />
+      <section className="ab-root" id="about" ref={ref}>
+        <div className="ab-grid" aria-hidden="true" />
+        <div className="ab-blob ab-blob-1" />
+        <div className="ab-blob ab-blob-2" />
 
-        <div className="about-inner">
+        <div className="ab-inner">
 
-          {/* Header */}
-          <div className={`fade-up ${visible ? "visible" : "hidden"}`}>
-            <div className="about-eyebrow">About Me</div>
-            <h2 className="about-heading">Who am <span>I?</span></h2>
+          {/* Eyebrow */}
+          <div className={`ab-eyebrow ${visible ? "on" : ""}`}>
+            <span className="ab-eyebrow-line" />
+            Who I am
           </div>
 
-          {/* Text + Highlight cards */}
-          <div className="about-grid">
-            <div className={`about-text-block fade-up ${visible ? "visible" : "hidden"}`} style={{ transitionDelay: "150ms" }}>
-              <p className="about-body">
-                I'm a <strong>fullstack developer</strong> passionate about crafting modern web
-                applications that blend aesthetics with raw performance. Specialised in{" "}
-                <strong>React, Node.js</strong> and cloud technologies, I turn ambitious ideas
-                into polished digital realities.
+          {/* Main two-col grid */}
+          <div className="ab-main">
+
+            {/* ── Text ── */}
+            <div className={`ab-text ${visible ? "on" : ""}`}>
+               <h2 className="sk-title">About <span className="accent">Me.</span></h2>
+              <p className="ab-p">
+                I'm a passionate <strong>fullstack developer</strong> based in Dubai, specializing in crafting
+                modern web applications that blend aesthetics with raw performance.
               </p>
-              <p className="about-body">
-                My approach is simple: <strong>clean architecture</strong>, scalable systems,
-                and an obsessive attention to design detail — because great products live at
-                the intersection of engineering and art.
+              <p className="ab-p">
+                With a Bachelor in IT system and project management, my approach is simple:{" "}
+                <strong>clean architecture</strong>, scalable systems, and an obsessive attention to design detail —
+                because great products live at the intersection of engineering and art.
               </p>
+
+              {/* Mini stats */}
+              <div className="ab-stats">
+                <div className="ab-stat">
+                  <span className="ab-stat-num">1+</span>
+                  <span className="ab-stat-lbl">Year XP</span>
+                </div>
+                <div className="ab-stat">
+                  <span className="ab-stat-num">3+</span>
+                  <span className="ab-stat-lbl">Projects</span>
+                </div>
+                <div className="ab-stat">
+                  <span className="ab-stat-num">2</span>
+                  <span className="ab-stat-lbl">Languages</span>
+                </div>
+              </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {highlights.map(({ icon: Icon, title, desc, color }, i) => (
+            {/* ── Photo col ── */}
+            <div className={`ab-photo-col ${visible ? "on" : ""}`}>
+              <div className="ab-photo-wrap">
+
+                {/* Spinning ring + planets */}
+                <div className="ab-spin-ring" aria-hidden="true" />
                 <div
-                  key={title}
-                  className={`highlight-card fade-right ${visible ? "visible" : "hidden"}`}
-                  style={{ transitionDelay: `${i * 120 + 200}ms`, "--card-color-a": `${color}08`, "--card-border": `${color}40` } as React.CSSProperties}
-                >
-                  <div className="highlight-icon-wrap" style={{ borderColor: `${color}30`, background: `${color}08` }}>
-                    <Icon size={17} style={{ color }} />
+                  className="ab-planet"
+                  style={{ "--r": "155px", "--dur": "9s", "--delay": "0s" } as React.CSSProperties}
+                  aria-hidden="true"
+                >⚛️</div>
+                <div
+                  className="ab-planet"
+                  style={{ "--r": "155px", "--dur": "13s", "--delay": "-4.5s" } as React.CSSProperties}
+                  aria-hidden="true"
+                >🎨</div>
+                <div
+                  className="ab-planet"
+                  style={{ "--r": "155px", "--dur": "11s", "--delay": "-8s" } as React.CSSProperties}
+                  aria-hidden="true"
+                >🛠</div>
+
+                {/* Corner accents */}
+                <span className="ab-corner ab-corner-tl" aria-hidden="true" />
+                <span className="ab-corner ab-corner-tr" aria-hidden="true" />
+                <span className="ab-corner ab-corner-bl" aria-hidden="true" />
+                <span className="ab-corner ab-corner-br" aria-hidden="true" />
+
+                {/* Photo frame */}
+                <div className="ab-photo-frame">
+                  <img
+                    src="/noe.jpeg"
+                    alt="Paha Noemie Carole — Fullstack Developer"
+                    loading="lazy"
+                  />
+                  <div className="ab-photo-overlay" aria-hidden="true" />
+
+                  {/* Name tag overlay */}
+                  <div className="ab-name-tag">
+                    <div className="ab-name-tag-inner">
+                      <div className="ab-name-tag-name">Paha Noémie Carole</div>
+                      <div className="ab-name-tag-role">Fullstack Developer · Dubai</div>
+                    </div>
+                    <div className="ab-status-dot" title="Available for work" />
                   </div>
-                  <div className="highlight-title" style={{ color }}>{title}</div>
-                  <div className="highlight-desc">{desc}</div>
                 </div>
-              ))}
+
+              </div>
             </div>
+
           </div>
 
-          {/* ── RECRUITER INFO BLOCK ── */}
-          <div className={`recruiter-block fade-up ${visible ? "visible" : "hidden"}`} style={{ transitionDelay: "350ms" }}>
-            <div className="recruiter-scan" />
-
-            {/* Header */}
-            <div className="recruiter-header">
-              <div className="recruiter-title">
-                <div className="rh-dot" />
-                Recruiter_Profile.info
+          {/* ── Contact cards ── */}
+          <div className={`ab-cards ${visible ? "on" : ""}`}>
+            {contactCards.map(({ icon: Icon, label, value, href, tags, bold }) => (
+              <div key={label} className="ab-card">
+                <div className="ab-card-hdr">
+                  <span className="ab-card-ico"><Icon size={13} color="#8B5CF6" /></span>
+                  {label}
+                </div>
+                {tags ? (
+                  <div>{tags.map(t => <span key={t} className="ab-tag-pill">{t}</span>)}</div>
+                ) : bold ? (
+                  <span className="ab-card-val" style={{ fontWeight: 700, color: "#fff", fontSize: "1rem" }}>{bold}</span>
+                ) : href ? (
+                  <a href={href} className="ab-card-val">{value}</a>
+                ) : (
+                  <span className="ab-card-val">{value}</span>
+                )}
               </div>
-              <div className="recruiter-badge">
-                <div className="badge-pulse" />
-                Open to Opportunities
-              </div>
-            </div>
-
-            {/* 4-col grid */}
-            <div className="info-grid">
-
-              {/* Location */}
-              <div className="info-cell" style={{ "--cc": "#00f5ff" } as React.CSSProperties}>
-                <div className="ic-icon" style={{ borderColor: "rgba(0,245,255,0.2)", background: "rgba(0,245,255,0.06)" }}>
-                  <MapPin size={13} style={{ color: "#00f5ff" }} />
-                </div>
-                <span className="ic-label" style={{ color: "rgba(0,245,255,0.4)" }}>Location</span>
-                <span className="ic-value">Al, Nhada 1 Dubai</span>
-              </div>
-
-              {/* Email */}
-              <div className="info-cell" style={{ "--cc": "#0080ff" } as React.CSSProperties}>
-                <div className="ic-icon" style={{ borderColor: "rgba(0,128,255,0.2)", background: "rgba(0,128,255,0.06)" }}>
-                  <Mail size={13} style={{ color: "#0080ff" }} />
-                </div>
-                <span className="ic-label" style={{ color: "rgba(0,128,255,0.4)" }}>Email</span>
-                <a href="mailto:nohemiepaha@gmail.com" className="ic-value">pahanohemie022024@gmail.com</a>
-              </div>
-
-              {/* Phone */}
-              <div className="info-cell" style={{ "--cc": "#00f5ff" } as React.CSSProperties}>
-                <div className="ic-icon" style={{ borderColor: "rgba(0,245,255,0.2)", background: "rgba(0,245,255,0.06)" }}>
-                  <Phone size={13} style={{ color: "#00f5ff" }} />
-                </div>
-                <span className="ic-label" style={{ color: "rgba(0,245,255,0.4)" }}>Phone</span>
-                <a href="tel:+971542371689" className="ic-value">+971 542 371 689</a>
-              </div>
-
-              {/* WhatsApp */}
-              <div className="info-cell" style={{ "--cc": "#00ff88" } as React.CSSProperties}>
-                <div className="ic-icon" style={{ borderColor: "rgba(0,255,136,0.2)", background: "rgba(0,255,136,0.06)" }}>
-                  <MessageCircle size={13} style={{ color: "#00ff88" }} />
-                </div>
-                <span className="ic-label" style={{ color: "rgba(0,255,136,0.4)" }}>WhatsApp</span>
-                <a href="https://wa.me/2250173551927" className="ic-value">{"+225 0173 551 927\n+971 542 371 689"}</a>
-              </div>
-
-              {/* Education */}
-              <div className="info-cell" style={{ "--cc": "#7b2fff" } as React.CSSProperties}>
-                <div className="ic-icon" style={{ borderColor: "rgba(123,47,255,0.2)", background: "rgba(123,47,255,0.06)" }}>
-                  <GraduationCap size={13} style={{ color: "#7b2fff" }} />
-                </div>
-                <span className="ic-label" style={{ color: "rgba(123,47,255,0.4)" }}>Education</span>
-                <span className="ic-value">{"Bachelor in IT system and project management)"}</span>
-              </div>
-
-              {/* Languages */}
-              <div className="info-cell" style={{ "--cc": "#ff2fff" } as React.CSSProperties}>
-                <div className="ic-icon" style={{ borderColor: "rgba(255,47,255,0.2)", background: "rgba(255,47,255,0.06)" }}>
-                  <Languages size={13} style={{ color: "#ff2fff" }} />
-                </div>
-                <span className="ic-label" style={{ color: "rgba(255,47,255,0.4)" }}>Languages</span>
-                <div style={{ display: "flex", gap: "5px", marginTop: "2px", flexWrap: "wrap" }}>
-                  {["French", "English"].map((lang) => (
-                    <span key={lang} className="tag-pill" style={{
-                      color: "rgba(255,100,255,0.9)", background: "rgba(255,47,255,0.08)",
-                      border: "1px solid rgba(255,47,255,0.2)",
-                    }}>{lang}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Contract */}
-              <div className="info-cell" style={{ "--cc": "#ffaa00" } as React.CSSProperties}>
-                <div className="ic-icon" style={{ borderColor: "rgba(255,170,0,0.2)", background: "rgba(255,170,0,0.06)" }}>
-                  <Briefcase size={13} style={{ color: "#ffaa00" }} />
-                </div>
-                <span className="ic-label" style={{ color: "rgba(255,170,0,0.4)" }}>Contract Type</span>
-                <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginTop: "2px" }}>
-                  {["CDI", "Freelance", "Remote"].map((t) => (
-                    <span key={t} className="tag-pill" style={{
-                      color: "rgba(255,180,0,0.9)", background: "rgba(255,170,0,0.08)",
-                      border: "1px solid rgba(255,170,0,0.2)",
-                    }}>{t}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Experience */}
-              <div className="info-cell" style={{ "--cc": "#00f5ff" } as React.CSSProperties}>
-                <div className="ic-icon" style={{ borderColor: "rgba(0,245,255,0.2)", background: "rgba(0,245,255,0.06)" }}>
-                  <Clock size={13} style={{ color: "#00f5ff" }} />
-                </div>
-                <span className="ic-label" style={{ color: "rgba(0,245,255,0.4)" }}>Experience</span>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "4px" }}>
-                  <span style={{
-                    fontFamily: "'Orbitron', monospace", fontSize: "1.6rem", fontWeight: 900,
-                    background: "linear-gradient(135deg, #00f5ff, #0080ff)",
-                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                    backgroundClip: "text", lineHeight: 1,
-                  }}>1+</span>
-                  <span style={{
-                    fontFamily: "'Rajdhani', sans-serif", fontSize: "0.75rem", fontWeight: 600,
-                    color: "rgba(180,210,255,0.4)", letterSpacing: "0.1em", textTransform: "uppercase",
-                  }}>Year</span>
-                </div>
-              </div>
-
-            </div>
+            ))}
           </div>
 
         </div>

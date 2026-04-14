@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+// SkillsSection.jsx
+import React, { useEffect, useRef, useState } from "react";
 
 const skillCategories = [
   {
     title: "Frontend",
-    code: "FE",
-    color: "#00f5ff",
     skills: [
       { name: "HTML", level: 95 },
       { name: "CSS", level: 90 },
@@ -14,19 +13,14 @@ const skillCategories = [
   },
   {
     title: "Backend",
-    code: "BE",
-    color: "#7b2fff",
     skills: [
       { name: "Node.js / Express", level: 90 },
       { name: "Python / Django", level: 80 },
       { name: "PostgreSQL", level: 85 },
-
     ],
   },
   {
     title: "DevOps & Tools",
-    code: "DO",
-    color: "#0080ff",
     skills: [
       { name: "Git / CI/CD", level: 92 },
       { name: "Figma", level: 85 },
@@ -34,87 +28,38 @@ const skillCategories = [
   },
 ];
 
-const SkillBar = ({
-  name,
-  level,
-  visible,
-  delay,
-  color,
-}: {
-  name: string;
-  level: number;
-  visible: boolean;
-  delay: number;
-  color: string;
-}) => (
+const SkillBar = ({ name, level, visible, delay }: { name: string; level: number; visible: boolean; delay: number }) => (
   <div
     style={{
+      marginBottom: "18px",
       opacity: visible ? 1 : 0,
-      transform: visible ? "translateX(0)" : "translateX(-12px)",
+      transform: visible ? "translateY(0)" : "translateY(10px)",
       transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
     }}
   >
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "8px" }}>
-      <span style={{
-        fontFamily: "'Rajdhani', sans-serif",
-        fontSize: "0.82rem",
-        fontWeight: 600,
-        letterSpacing: "0.08em",
-        textTransform: "uppercase",
-        color: "rgba(180,210,255,0.65)",
-      }}>
-        {name}
-      </span>
-      <span style={{
-        fontFamily: "'Orbitron', monospace",
-        fontSize: "0.6rem",
-        fontWeight: 700,
-        color,
-        letterSpacing: "0.05em",
-      }}>
-        {level}%
-      </span>
+    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "7px" }}>
+      <span className="sk-name">{name}</span>
+      <span className="sk-pct">{level}%</span>
     </div>
-
-    {/* Track */}
-    <div style={{
-      height: "3px",
-      background: "rgba(255,255,255,0.04)",
-      position: "relative",
-      overflow: "hidden",
-      clipPath: "polygon(0% 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)",
-    }}>
-      {/* Fill */}
-      <div style={{
-        height: "100%",
-        width: visible ? `${level}%` : "0%",
-        background: `linear-gradient(90deg, ${color}60, ${color})`,
-        transition: `width 1.1s cubic-bezier(0.22, 1, 0.36, 1) ${delay + 200}ms`,
-        position: "relative",
-      }}>
-        {/* Glow tip */}
-        <div style={{
-          position: "absolute",
-          right: 0, top: "-3px",
-          width: "2px", height: "9px",
-          background: color,
-          boxShadow: `0 0 10px ${color}, 0 0 20px ${color}`,
-          opacity: visible ? 1 : 0,
-          transition: `opacity 0.3s ease ${delay + 1000}ms`,
-        }} />
-      </div>
+    <div className="sk-track">
+      <div
+        className="sk-fill"
+        style={{
+          width: visible ? `${level}%` : "0%",
+          transition: `width 1.6s cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+        }}
+      />
     </div>
   </div>
 );
 
 const SkillsSection = () => {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef(null);
   const [visible, setVisible] = useState(false);
-  const [activeCard, setActiveCard] = useState<number | null>(null);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
-      ([e]) => e.isIntersecting && setVisible(true),
+      ([e]) => { if (e.isIntersecting) setVisible(true); },
       { threshold: 0.1 }
     );
     if (ref.current) obs.observe(ref.current);
@@ -124,312 +69,160 @@ const SkillsSection = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        @keyframes sk-fade-up {
+          from { opacity: 0; transform: translateY(22px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes sk-shimmer {
+          0% { left: -60%; }
+          100% { left: 120%; }
+        }
+        @keyframes sk-pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.5); opacity: 0.5; }
+        }
 
         #skills {
-          font-family: 'Rajdhani', sans-serif;
-          background: #02040f;
-          padding: 8rem 1.5rem;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          background: #000000;
+          padding: 100px 24px;
+          color: #ffffff;
           position: relative;
           overflow: hidden;
         }
-
-        /* Grid */
         #skills::before {
           content: '';
           position: absolute;
-          inset: 0;
-          background-image:
-            linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
-          background-size: 60px 60px;
+          top: -80px; left: -60px;
+          width: 450px; height: 450px;
+          background: radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%);
           pointer-events: none;
         }
 
-        .skills-glow-a {
-          position: absolute;
-          width: 600px; height: 600px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(0,245,255,0.05) 0%, transparent 70%);
-          top: -100px; left: -150px;
-          pointer-events: none;
+        .sk-inner { max-width: 1000px; margin: 0 auto; }
+
+        .sk-eyebrow {
+          font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.12em; color: #8B5CF6; margin-bottom: 12px;
+          display: flex; align-items: center; gap: 10px;
+          animation: sk-fade-up 0.6s ease both;
+        }
+        .sk-eyebrow::before {
+          content: ''; display: inline-block;
+          width: 24px; height: 2px; background: #8B5CF6;
+          border-radius: 1px; flex-shrink: 0;
         }
 
-        .skills-glow-b {
-          position: absolute;
-          width: 500px; height: 500px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(123,47,255,0.06) 0%, transparent 70%);
-          bottom: -100px; right: -100px;
-          pointer-events: none;
+        .sk-head { margin-bottom: 56px; animation: sk-fade-up 0.6s ease 0.05s both; }
+        .sk-title {
+          font-size: clamp(2rem, 5vw, 3rem);
+          font-weight: 800; letter-spacing: -0.03em;
+          margin-bottom: 12px; line-height: 1.1;
         }
+        .sk-title .accent { color: #8B5CF6; }
+        .sk-sub { color: #475569; font-size: 1rem; line-height: 1.7; max-width: 560px; }
 
-        .skills-inner {
-          max-width: 1100px;
-          margin: 0 auto;
-          position: relative;
-          z-index: 2;
-        }
-
-        /* Eyebrow */
-        .skills-eyebrow {
-          font-family: 'Orbitron', monospace;
-          font-size: 0.6rem;
-          font-weight: 700;
-          letter-spacing: 0.35em;
-          text-transform: uppercase;
-          color: #00f5ff;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 1rem;
-        }
-
-        .skills-eyebrow::before {
-          content: '';
-          width: 30px; height: 1px;
-          background: linear-gradient(90deg, transparent, #00f5ff);
-        }
-
-        .skills-heading {
-          font-family: 'Orbitron', monospace;
-          font-weight: 900;
-          font-size: clamp(2rem, 4vw, 3rem);
-          color: #e8f4ff;
-          margin-bottom: 1rem;
-        }
-
-        .skills-heading span {
-          background: linear-gradient(135deg, #00f5ff, #7b2fff);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        /* Progress ring top bar */
-        .skills-overview {
-          display: flex;
-          gap: 2rem;
-          flex-wrap: wrap;
-          margin-bottom: 4rem;
-          padding-bottom: 3rem;
-          border-bottom: 1px solid rgba(0,245,255,0.07);
-        }
-
-        .overview-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .overview-dot {
-          width: 6px; height: 6px;
-          border-radius: 50%;
-        }
-
-        .overview-label {
-          font-family: 'Orbitron', monospace;
-          font-size: 0.55rem;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-        }
-
-        /* Cards grid */
-        .skills-grid {
+        .sk-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1.5rem;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 20px;
         }
 
-        @media (max-width: 900px) { .skills-grid { grid-template-columns: 1fr; } }
-        @media (min-width: 600px) and (max-width: 900px) { .skills-grid { grid-template-columns: repeat(2, 1fr); } }
-
-        /* Skill card */
-        .skill-card {
+        .sk-card {
+          background: #080808;
+          border: 1px solid #161616;
+          border-radius: 18px;
+          padding: 28px 26px;
           position: relative;
-          padding: 2rem;
-          background: rgba(255,255,255,0.015);
-          border: 1px solid rgba(255,255,255,0.06);
           overflow: hidden;
-          cursor: default;
-          transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+          transition: all 0.35s ease;
         }
-
-        .skill-card::after {
+        .sk-card::before {
           content: '';
           position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 1px;
-          background: var(--card-color, #00f5ff);
-          opacity: 0.4;
-          transition: opacity 0.3s;
+          top: 0; left: 0; right: 0; height: 2px;
+          background: linear-gradient(90deg, transparent, #8B5CF6, transparent);
+          opacity: 0; transition: opacity 0.3s ease;
         }
-
-        .skill-card.active {
-          border-color: var(--card-border, rgba(0,245,255,0.3));
-          background: rgba(0,245,255,0.02);
-          transform: translateY(-4px);
-        }
-
-        .skill-card.active::after { opacity: 1; }
-
-        /* Corner decoration */
-        .card-corner {
+        .sk-card::after {
+          content: '';
           position: absolute;
-          width: 14px; height: 14px;
-          border-color: var(--card-color, #00f5ff);
-          border-style: solid;
-          opacity: 0.4;
-          transition: opacity 0.3s;
+          top: 0; left: -60%; width: 30%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(139,92,246,0.04), transparent);
+          animation: sk-shimmer 6s ease-in-out infinite;
         }
-        .skill-card.active .card-corner { opacity: 1; }
-        .corner-tl { top: 8px; left: 8px; border-width: 1px 0 0 1px; }
-        .corner-br { bottom: 8px; right: 8px; border-width: 0 1px 1px 0; }
+        .sk-card:hover { border-color: rgba(139,92,246,0.28); transform: translateY(-4px); background: #0b0b0b; }
+        .sk-card:hover::before { opacity: 1; }
 
-        /* Card header */
-        .card-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 2rem;
+        .sk-label {
+          font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.12em; color: #8B5CF6; margin-bottom: 24px;
+          display: flex; align-items: center; gap: 8px;
         }
-
-        .card-title {
-          font-family: 'Orbitron', monospace;
-          font-size: 0.7rem;
-          font-weight: 700;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: #e8f4ff;
+        .sk-label-dot {
+          width: 5px; height: 5px; border-radius: 50%; background: #8B5CF6;
+          animation: sk-pulse 2s ease-in-out infinite; flex-shrink: 0;
         }
 
-        .card-code {
-          font-family: 'Orbitron', monospace;
-          font-size: 0.55rem;
-          font-weight: 900;
-          letter-spacing: 0.1em;
-          padding: 4px 10px;
-          clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
-        }
+        .sk-name { font-size: 0.9rem; font-weight: 600; color: #e2e8f0; }
+        .sk-pct { font-size: 0.78rem; font-weight: 700; color: #8B5CF6; }
 
-        /* BG watermark */
-        .card-watermark {
-          position: absolute;
-          bottom: 10px; right: 14px;
-          font-family: 'Orbitron', monospace;
-          font-size: 3.5rem;
-          font-weight: 900;
-          opacity: 0.025;
-          letter-spacing: -0.02em;
-          pointer-events: none;
-          line-height: 1;
+        .sk-track {
+          height: 5px; background: #141414;
+          border-radius: 100px; overflow: hidden; position: relative;
         }
-
-        /* Skill bars spacing */
-        .bars-wrap {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
+        .sk-fill {
+          height: 100%; border-radius: 100px;
+          background: linear-gradient(90deg, #8B5CF6, #A78BFA);
+          position: relative;
         }
-
-        /* Fade in */
-        .fade-up {
-          transition: opacity 0.7s ease, transform 0.7s ease;
+        .sk-fill::after {
+          content: '';
+          position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+          width: 8px; height: 8px; border-radius: 50%;
+          background: #fff;
+          box-shadow: 0 0 6px rgba(139,92,246,0.8);
         }
-        .fade-up.hidden { opacity: 0; transform: translateY(24px); }
-        .fade-up.visible { opacity: 1; transform: translateY(0); }
       `}</style>
 
       <section id="skills" ref={ref}>
-        <div className="skills-glow-a" />
-        <div className="skills-glow-b" />
-
-        <div className="skills-inner">
-
-          {/* Header */}
-          <div className={`fade-up ${visible ? "visible" : "hidden"}`}>
-            <div className="skills-eyebrow">Technical_Capabilities</div>
-            <h2 className="skills-heading">
-              System<span>_Stack</span>
-            </h2>
+        <div className="sk-inner">
+          <div className="sk-eyebrow">What I use</div>
+          <div className="sk-head">
+            <h2 className="sk-title">Technical <span className="accent">Stack.</span></h2>
+            <p className="sk-sub">
+              Tools and technologies I use to build robust, scalable and visually stunning digital products.
+            </p>
           </div>
 
-          {/* Overview legend */}
-          <div
-            className={`skills-overview fade-up ${visible ? "visible" : "hidden"}`}
-            style={{ transitionDelay: "150ms" }}
-          >
-            {skillCategories.map(({ title, code, color }) => (
-              <div className="overview-item" key={code}>
-                <div className="overview-dot" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
-                <span className="overview-label" style={{ color: `${color}80` }}>{title}</span>
-              </div>
-            ))}
-            <div className="overview-item" style={{ marginLeft: "auto" }}>
-              <span style={{
-                fontFamily: "'Orbitron', monospace",
-                fontSize: "0.5rem",
-                letterSpacing: "0.15em",
-                color: "rgba(0,245,255,0.3)",
-                textTransform: "uppercase",
-              }}>
-                Proficiency_Level / 100
-              </span>
-            </div>
-          </div>
-
-          {/* Cards */}
-          <div className="skills-grid">
+          <div className="sk-grid">
             {skillCategories.map((cat, ci) => (
               <div
                 key={cat.title}
-                className={`skill-card fade-up ${visible ? "visible" : "hidden"} ${activeCard === ci ? "active" : ""}`}
+                className="sk-card"
                 style={{
-                  transitionDelay: `${ci * 150 + 300}ms`,
-                  "--card-color": cat.color,
-                  "--card-border": `${cat.color}40`,
-                } as React.CSSProperties}
-                onMouseEnter={() => setActiveCard(ci)}
-                onMouseLeave={() => setActiveCard(null)}
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? "translateY(0)" : "translateY(20px)",
+                  transition: `all 0.7s ease ${ci * 100}ms`,
+                }}
               >
-                {/* Corner accents */}
-                <div className="card-corner corner-tl" style={{ borderColor: cat.color }} />
-                <div className="card-corner corner-br" style={{ borderColor: cat.color }} />
-
-                {/* BG watermark */}
-                <div className="card-watermark" style={{ color: cat.color }}>{cat.code}</div>
-
-                {/* Header */}
-                <div className="card-header">
-                  <div className="card-title">{cat.title}</div>
-                  <div
-                    className="card-code"
-                    style={{
-                      background: `${cat.color}15`,
-                      border: `1px solid ${cat.color}30`,
-                      color: cat.color,
-                    }}
-                  >
-                    {cat.code}
-                  </div>
+                <div className="sk-label">
+                  <span className="sk-label-dot" />
+                  {cat.title}
                 </div>
-
-                {/* Bars */}
-                <div className="bars-wrap">
-                  {cat.skills.map((skill, si) => (
-                    <SkillBar
-                      key={skill.name}
-                      {...skill}
-                      visible={visible}
-                      delay={ci * 150 + si * 100 + 500}
-                      color={cat.color}
-                    />
-                  ))}
-                </div>
+                {cat.skills.map((skill, si) => (
+                  <SkillBar
+                    key={skill.name}
+                    {...skill}
+                    visible={visible}
+                    delay={ci * 100 + si * 100 + 100}
+                  />
+                ))}
               </div>
             ))}
           </div>
-
         </div>
       </section>
     </>

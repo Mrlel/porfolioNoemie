@@ -1,269 +1,83 @@
-import { useEffect, useRef, useState } from "react";
-import { ExternalLink, GitFork, ChevronRight } from "lucide-react";
+// ProjectsSection.jsx
+import React, { useEffect, useRef, useState } from "react";
+import { ExternalLink, GitFork, ArrowUpRight } from "lucide-react";
 
-const projects = [
+const projects: Project[] = [
   {
+    id: "PRJ-001",
     title: "E-Commerce Platform",
     desc: "Modern e-commerce platform with integrated payments, real-time inventory management and analytics dashboard.",
     tags: ["React", "Node.js", "Stripe", "PostgreSQL"],
-    id: "PRJ-001",
     status: "LIVE",
     year: "2024",
-    color: "#00f5ff",
     github: "#",
     demo: "#",
   },
-
+  // Ajoute tes autres projets ici en suivant la même structure
 ];
 
-const ProjectCard = ({
-  project,
-  visible,
-  delay,
-}: {
-  project: (typeof projects)[0];
-  visible: boolean;
-  delay: number;
-}) => {
-  const [hovered, setHovered] = useState(false);
+type ProjectStatus = "LIVE" | "WIP" | "ARCHIVED";
+type Project = { id: string; title: string; desc: string; tags: string[]; status: ProjectStatus; year: string; github: string; demo: string };
 
+const statusConfig: Record<ProjectStatus, { label: string; className: string }> = {
+  LIVE: { label: "LIVE", className: "status-live" },
+  WIP: { label: "IN PROGRESS", className: "status-wip" },
+  ARCHIVED: { label: "ARCHIVED", className: "status-archived" },
+};
+
+const ProjectCard = ({ project, visible, delay }: { project: Project; visible: boolean; delay: number }) => {
+  const status = statusConfig[project.status] ?? statusConfig.LIVE;
   return (
     <div
+      className="pj-card"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(28px)",
-        transition: `opacity 0.7s ease ${delay}ms, transform 0.7s ease ${delay}ms, border-color 0.3s ease, background 0.3s ease`,
-        position: "relative",
-        background: hovered ? `${project.color}06` : "rgba(255,255,255,0.015)",
-        border: `1px solid ${hovered ? `${project.color}40` : "rgba(255,255,255,0.06)"}`,
-        overflow: "hidden",
-        cursor: "default",
-      } as React.CSSProperties}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+        transition: `all 0.7s cubic-bezier(0.2,0.8,0.2,1) ${delay}ms`,
+      }}
     >
-      {/* Top accent line */}
-      <div style={{
-        position: "absolute",
-        top: 0, left: 0, right: 0,
-        height: "1px",
-        background: `linear-gradient(90deg, transparent, ${project.color}, transparent)`,
-        opacity: hovered ? 1 : 0.3,
-        transition: "opacity 0.3s ease",
-      }} />
-
-      {/* Corner clips */}
-      <div style={{
-        position: "absolute", top: 8, left: 8,
-        width: 12, height: 12,
-        borderTop: `1px solid ${project.color}`,
-        borderLeft: `1px solid ${project.color}`,
-        opacity: hovered ? 0.8 : 0.2,
-        transition: "opacity 0.3s ease",
-      }} />
-      <div style={{
-        position: "absolute", bottom: 8, right: 8,
-        width: 12, height: 12,
-        borderBottom: `1px solid ${project.color}`,
-        borderRight: `1px solid ${project.color}`,
-        opacity: hovered ? 0.8 : 0.2,
-        transition: "opacity 0.3s ease",
-      }} />
-
-      {/* Visual header */}
-      <div style={{
-        height: "160px",
-        position: "relative",
-        overflow: "hidden",
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
-        background: `radial-gradient(ellipse at center, ${project.color}0a 0%, transparent 70%)`,
-      }}>
-        {/* Inner grid */}
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: `linear-gradient(${project.color}08 1px, transparent 1px), linear-gradient(90deg, ${project.color}08 1px, transparent 1px)`,
-          backgroundSize: "24px 24px",
-        }} />
-
-        {/* Geometric shapes */}
-        <div style={{
-          position: "absolute", inset: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <div style={{
-            width: 56, height: 56,
-            border: `1px solid ${project.color}30`,
-            transform: `rotate(${hovered ? "90deg" : "45deg"})`,
-            transition: "transform 0.8s ease",
-            position: "absolute",
-          }} />
-          <div style={{
-            width: 80, height: 80,
-            border: `1px solid ${project.color}15`,
-            transform: `rotate(${hovered ? "-45deg" : "0deg"})`,
-            transition: "transform 1.2s ease",
-            position: "absolute",
-          }} />
-          <span style={{
-            fontFamily: "'Orbitron', monospace",
-            fontSize: "1.4rem", fontWeight: 900,
-            color: `${project.color}20`, letterSpacing: "0.05em", zIndex: 1,
-          }}>{project.id}</span>
+      <div className="pj-top">
+        <div className="pj-meta">
+          <span className="pj-year">{project.year}</span>
+          <span className={`pj-status ${status.className}`}>{status.label}</span>
         </div>
-
-        {/* Top-left ID */}
-        <div style={{
-          position: "absolute", top: 12, left: 14,
-          fontFamily: "'Orbitron', monospace",
-          fontSize: "0.5rem", letterSpacing: "0.2em",
-          color: `${project.color}50`,
-        }}>{project.id}</div>
-
-        {/* Status badge */}
-        <div style={{
-          position: "absolute", top: 10, right: 12,
-          fontFamily: "'Orbitron', monospace",
-          fontSize: "0.45rem", fontWeight: 700, letterSpacing: "0.2em",
-          color: project.status === "LIVE" ? "#00ff88" : "#ffaa00",
-          background: project.status === "LIVE" ? "rgba(0,255,136,0.08)" : "rgba(255,170,0,0.08)",
-          border: `1px solid ${project.status === "LIVE" ? "rgba(0,255,136,0.25)" : "rgba(255,170,0,0.25)"}`,
-          padding: "3px 8px",
-          clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
-          display: "flex", alignItems: "center", gap: "5px",
-        }}>
-          <div style={{
-            width: 4, height: 4, borderRadius: "50%",
-            background: project.status === "LIVE" ? "#00ff88" : "#ffaa00",
-            boxShadow: `0 0 6px ${project.status === "LIVE" ? "#00ff88" : "#ffaa00"}`,
-            animation: "blink 1.5s ease-in-out infinite",
-          }} />
-          {project.status}
-        </div>
-
-        {/* Hover action overlay */}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "rgba(2,4,15,0.8)",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: "16px",
-          opacity: hovered ? 1 : 0,
-          transition: "opacity 0.3s ease",
-        }}>
-          {[
-            { icon: GitFork, href: project.github, label: "Source" },
-            { icon: ExternalLink, href: project.demo, label: "Live" },
-          ].map(({ icon: Icon, href, label }) => (
-            <a key={label} href={href} style={{
-              width: 42, height: 42,
-              border: `1px solid ${project.color}60`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: project.color, textDecoration: "none",
-              background: `${project.color}10`,
-              clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)",
-            }}>
-              <Icon size={16} />
-            </a>
-          ))}
-        </div>
-
-        {/* Bottom dots */}
-        <div style={{ position: "absolute", bottom: 12, right: 14, display: "flex", gap: "4px" }}>
-          {[1,2,3].map((d) => (
-            <div key={d} style={{
-              width: 3, height: 3,
-              background: `${project.color}${hovered ? "60" : "25"}`,
-              transition: "background 0.3s ease",
-            }} />
-          ))}
+        <div className="pj-links">
+          <a href={project.github} className="pj-icon-link" target="_blank" rel="noreferrer" aria-label="GitHub">
+            <GitFork size={14} />
+          </a>
+          <a href={project.demo} className="pj-icon-link" target="_blank" rel="noreferrer" aria-label="Live demo">
+            <ExternalLink size={14} />
+          </a>
         </div>
       </div>
 
-      {/* Card body */}
-      <div style={{ padding: "1.5rem 1.6rem 1.6rem" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "0.6rem" }}>
-          <h3 style={{
-            fontFamily: "'Orbitron', monospace",
-            fontSize: "0.85rem", fontWeight: 700,
-            letterSpacing: "0.06em",
-            color: hovered ? project.color : "#e8f4ff",
-            textTransform: "uppercase",
-            transition: "color 0.3s ease",
-            lineHeight: 1.3,
-          }}>
-            {project.title}
-          </h3>
-          <span style={{
-            fontFamily: "'Orbitron', monospace",
-            fontSize: "0.5rem",
-            color: "rgba(180,210,255,0.25)",
-            letterSpacing: "0.1em",
-            flexShrink: 0, marginLeft: "8px",
-          }}>{project.year}</span>
-        </div>
+      <h3 className="pj-name">{project.title}</h3>
+      <p className="pj-desc">{project.desc}</p>
 
-        <p style={{
-          fontFamily: "'Rajdhani', sans-serif",
-          fontSize: "0.92rem", lineHeight: 1.75,
-          color: "rgba(180,210,255,0.5)",
-          marginBottom: "1.2rem", fontWeight: 400,
-        }}>
-          {project.desc}
-        </p>
+      <div className="pj-tags">
+        {project.tags.map((tag) => (
+          <span key={tag} className="pj-tag">{tag}</span>
+        ))}
+      </div>
 
-        {/* Tags */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "1.2rem" }}>
-          {project.tags.map((tag) => (
-            <span key={tag} style={{
-              fontFamily: "'Orbitron', monospace",
-              fontSize: "0.48rem", fontWeight: 700,
-              letterSpacing: "0.12em", textTransform: "uppercase",
-              color: `${project.color}90`,
-              background: `${project.color}0c`,
-              border: `1px solid ${project.color}25`,
-              padding: "3px 10px",
-              clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)",
-            }}>
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        {/* Footer */}
-        <div style={{
-          borderTop: "1px solid rgba(255,255,255,0.04)",
-          paddingTop: "1rem",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-        }}>
-          <a href={project.demo} style={{
-            fontFamily: "'Orbitron', monospace",
-            fontSize: "0.5rem", fontWeight: 700,
-            letterSpacing: "0.15em", textTransform: "uppercase",
-            color: hovered ? project.color : "rgba(180,210,255,0.3)",
-            textDecoration: "none",
-            display: "flex", alignItems: "center", gap: "6px",
-            transition: "color 0.3s ease",
-          }}>
-            View Project <ChevronRight size={10} />
-          </a>
-          <span style={{
-            fontFamily: "'Orbitron', monospace",
-            fontSize: "0.45rem",
-            color: `${project.color}35`,
-            letterSpacing: "0.1em",
-          }}>v1.0.0</span>
-        </div>
+      <div className="pj-footer">
+        <a href={project.demo} className="pj-cta">
+          View Project <ArrowUpRight size={14} />
+        </a>
+        <span className="pj-id">{project.id}</span>
       </div>
     </div>
   );
 };
 
 const ProjectsSection = () => {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
-      ([e]) => e.isIntersecting && setVisible(true),
-      { threshold: 0.08 }
+      ([e]) => { if (e.isIntersecting) setVisible(true); },
+      { threshold: 0.05 }
     );
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
@@ -272,143 +86,189 @@ const ProjectsSection = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        @keyframes pj-fade-up {
+          from { opacity: 0; transform: translateY(22px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pj-pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.5); opacity: 0.5; }
+        }
+        @keyframes pj-shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
 
         #projects {
-          font-family: 'Rajdhani', sans-serif;
-          background: #02040f;
-          padding: 8rem 1.5rem;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          background: #000000;
+          padding: 100px 24px 120px;
+          color: #ffffff;
           position: relative;
           overflow: hidden;
         }
-
         #projects::before {
           content: '';
-          position: absolute; inset: 0;
-          background-image:
-            linear-gradient(rgba(0,245,255,0.025) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,245,255,0.025) 1px, transparent 1px);
-          background-size: 60px 60px;
+          position: absolute;
+          bottom: -60px; right: -60px;
+          width: 500px; height: 500px;
+          background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%);
           pointer-events: none;
         }
 
-        .proj-glow-a {
-          position: absolute; width: 500px; height: 500px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(0,245,255,0.05) 0%, transparent 70%);
-          top: 0; right: -100px; pointer-events: none;
+        .pj-inner { max-width: 1000px; margin: 0 auto; }
+
+        .pj-eyebrow {
+          font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.12em; color: #8B5CF6; margin-bottom: 12px;
+          display: flex; align-items: center; gap: 10px;
+          animation: pj-fade-up 0.6s ease both;
+        }
+        .pj-eyebrow::before {
+          content: ''; display: inline-block;
+          width: 24px; height: 2px; background: #8B5CF6;
+          border-radius: 1px; flex-shrink: 0;
         }
 
-        .proj-glow-b {
-          position: absolute; width: 400px; height: 400px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(123,47,255,0.06) 0%, transparent 70%);
-          bottom: 0; left: -100px; pointer-events: none;
+        .pj-head { margin-bottom: 56px; animation: pj-fade-up 0.6s ease 0.05s both; }
+        .pj-title {
+          font-size: clamp(2rem, 5vw, 3rem);
+          font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;
         }
+        .pj-title .accent { color: #8B5CF6; }
 
-        .proj-inner {
-          max-width: 1100px; margin: 0 auto;
-          position: relative; z-index: 2;
-        }
-
-        .proj-eyebrow {
-          font-family: 'Orbitron', monospace;
-          font-size: 0.6rem; font-weight: 700;
-          letter-spacing: 0.35em; text-transform: uppercase;
-          color: #00f5ff;
-          display: flex; align-items: center; gap: 12px;
-          margin-bottom: 1rem;
-        }
-
-        .proj-eyebrow::before {
-          content: '';
-          width: 30px; height: 1px;
-          background: linear-gradient(90deg, transparent, #00f5ff);
-        }
-
-        .proj-heading {
-          font-family: 'Orbitron', monospace;
-          font-weight: 900;
-          font-size: clamp(2rem, 4vw, 3rem);
-          color: #e8f4ff; margin-bottom: 4rem;
-        }
-
-        .proj-heading span {
-          background: linear-gradient(135deg, #00f5ff, #7b2fff);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        .proj-grid {
+        .pj-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1.5rem;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 20px;
         }
 
-        @media (max-width: 768px) { .proj-grid { grid-template-columns: 1fr; } }
-
-        .fade-up { transition: opacity 0.7s ease, transform 0.7s ease; }
-        .fade-up.hidden { opacity: 0; transform: translateY(24px); }
-        .fade-up.visible { opacity: 1; transform: translateY(0); }
-
-        @keyframes blink {
-          0%,100% { opacity: 1; }
-          50% { opacity: 0.3; }
+        .pj-card {
+          background: #080808;
+          border: 1px solid #161616;
+          border-radius: 20px;
+          padding: 28px;
+          display: flex; flex-direction: column;
+          position: relative; overflow: hidden;
+          transition: all 0.35s ease;
         }
+        .pj-card::before {
+          content: '';
+          position: absolute; inset: 0;
+          background: radial-gradient(circle at top right, rgba(139,92,246,0.05), transparent 60%);
+          opacity: 0; transition: opacity 0.35s ease;
+        }
+        .pj-card:hover {
+          border-color: rgba(139,92,246,0.3);
+          transform: translateY(-5px); background: #0c0c0c;
+        }
+        .pj-card:hover::before { opacity: 1; }
+
+        .pj-top {
+          display: flex; justify-content: space-between; align-items: flex-start;
+          margin-bottom: 20px;
+        }
+        .pj-meta { display: flex; gap: 8px; align-items: center; }
+
+        .pj-year {
+          font-size: 0.7rem; font-weight: 700; color: #8B5CF6;
+          background: rgba(139,92,246,0.1); padding: 4px 10px; border-radius: 6px;
+        }
+        .pj-status {
+          font-size: 0.65rem; font-weight: 700; padding: 4px 10px;
+          border-radius: 6px; display: flex; align-items: center; gap: 5px;
+        }
+        .status-live { color: #10b981; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); }
+        .status-live::before {
+          content: ''; width: 5px; height: 5px; background: #10b981;
+          border-radius: 50%; animation: pj-pulse 2s ease-in-out infinite;
+        }
+        .status-wip { color: #f59e0b; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+        .status-archived { color: #64748b; background: rgba(100,116,139,0.08); border: 1px solid rgba(100,116,139,0.2); }
+
+        .pj-links { display: flex; gap: 8px; }
+        .pj-icon-link {
+          width: 32px; height: 32px; border-radius: 8px;
+          background: #111; border: 1px solid #1f1f1f;
+          display: flex; align-items: center; justify-content: center;
+          color: #475569; text-decoration: none;
+          transition: all 0.25s ease;
+        }
+        .pj-icon-link:hover { background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.3); color: #a78bfa; }
+
+        .pj-name {
+          font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em;
+          margin-bottom: 10px; line-height: 1.2;
+        }
+        .pj-desc {
+          font-size: 0.88rem; line-height: 1.7; color: #475569;
+          margin-bottom: 20px; flex: 1;
+        }
+        .pj-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+        .pj-tag {
+          font-size: 0.68rem; font-weight: 600; padding: 4px 10px;
+          background: #111; border: 1px solid #1f1f1f;
+          border-radius: 6px; color: #94a3b8; letter-spacing: 0.02em;
+        }
+
+        .pj-footer {
+          display: flex; justify-content: space-between; align-items: center;
+          padding-top: 18px; border-top: 1px solid #141414; margin-top: auto;
+        }
+        .pj-cta {
+          display: flex; align-items: center; gap: 6px;
+          font-size: 0.82rem; font-weight: 700; color: #fff; text-decoration: none;
+          transition: all 0.25s ease;
+        }
+        .pj-cta:hover { color: #a78bfa; }
+        .pj-cta:hover svg { transform: translate(2px, -2px); }
+        .pj-cta svg { transition: transform 0.25s ease; }
+        .pj-id { font-size: 0.68rem; color: #1f1f1f; font-weight: 600; }
+
+        .pj-github-row { text-align: center; margin-top: 52px; }
+        .pj-github-btn {
+          display: inline-flex; align-items: center; gap: 10px;
+          background: #ffffff; color: #000000;
+          padding: 13px 32px; border-radius: 12px;
+          font-weight: 700; font-size: 0.9rem; text-decoration: none;
+          position: relative; overflow: hidden;
+          transition: transform 0.2s ease, box-shadow 0.3s ease;
+          box-shadow: 0 6px 24px -6px rgba(139,92,246,0.3);
+          font-family: inherit;
+        }
+        .pj-github-btn::after {
+          content: '';
+          position: absolute; inset: 0;
+          background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+          transform: translateX(-100%); transition: transform 0.5s ease;
+        }
+        .pj-github-btn:hover::after { transform: translateX(100%); }
+        .pj-github-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px -6px rgba(139,92,246,0.4); }
       `}</style>
 
       <section id="projects" ref={ref}>
-        <div className="proj-glow-a" />
-        <div className="proj-glow-b" />
-
-        <div className="proj-inner">
-          <div className={`fade-up ${visible ? "visible" : "hidden"}`}>
-            <div className="proj-eyebrow">Archive_Files</div>
-            <h2 className="proj-heading">Recent<span>_Works</span></h2>
+        <div className="pj-inner">
+          <div className="pj-eyebrow">What I've built</div>
+          <div className="pj-head">
+            <h2 className="pj-title">Selected <span className="accent">Works</span></h2>
           </div>
 
-          <div className="proj-grid">
+          <div className="pj-grid">
             {projects.map((project, i) => (
               <ProjectCard
                 key={project.id}
                 project={project}
                 visible={visible}
-                delay={i * 120 + 200}
+                delay={i * 120}
               />
             ))}
           </div>
 
-          {/* CTA */}
-          <div
-            className={`fade-up ${visible ? "visible" : "hidden"}`}
-            style={{ transitionDelay: "600ms", marginTop: "3rem", display: "flex", justifyContent: "center" }}
-          >
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                fontFamily: "'Orbitron', monospace",
-                fontSize: "0.6rem", fontWeight: 700,
-                letterSpacing: "0.2em", textTransform: "uppercase",
-                color: "#00f5ff", textDecoration: "none",
-                border: "1px solid rgba(0,245,255,0.25)",
-                padding: "12px 32px",
-                clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)",
-                background: "rgba(0,245,255,0.04)",
-                display: "flex", alignItems: "center", gap: "10px",
-                transition: "all 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(0,245,255,0.08)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.5)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(0,245,255,0.04)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.25)";
-              }}
-            >
-              <GitFork size={13} />
-              View All on GitHub
+          <div className="pj-github-row">
+            <a href="https://github.com" className="pj-github-btn" target="_blank" rel="noreferrer">
+              <GitFork size={16} /> View GitHub
             </a>
           </div>
         </div>
